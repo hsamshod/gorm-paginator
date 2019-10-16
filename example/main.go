@@ -8,14 +8,15 @@ import (
 )
 
 type User struct {
-	ID       int
+	ID       uint   `gorm:"primary_key"`
 	UserName string `gorm:"not null;size:100;unique"`
 }
 
 type Phone struct {
+	ID     uint `gorm:"primary_key"`
 	Number string
-	UserId int
-	User   User
+	UserId uint `gorm:"user_id"`
+	User   User `gorm:"foreignkey:UserId"`
 }
 
 func main() {
@@ -27,18 +28,26 @@ func main() {
 		db.Model(User{}).Count(&count)
 
 		if count == 0 {
-			db.Create(User{ID: 1, UserName: "biezhi"})
-			db.Create(Phone{Number: "2251097", UserId: 1})
-			db.Create(User{ID: 2, UserName: "rose"})
-			db.Create(Phone{Number: "2251098", UserId: 2})
-			db.Create(User{ID: 3, UserName: "jack"})
-			db.Create(Phone{Number: "2251099", UserId: 3})
-			db.Create(User{ID: 4, UserName: "lili"})
-			db.Create(Phone{Number: "2251100", UserId: 4})
-			db.Create(User{ID: 5, UserName: "bob"})
-			db.Create(User{ID: 6, UserName: "tom"})
-			db.Create(User{ID: 7, UserName: "anny"})
-			db.Create(User{ID: 8, UserName: "wat"})
+			user := User{UserName: "biezhi"}
+			db.Create(&user)
+
+			db.Create(&Phone{Number: "2251097", UserId: user.ID})
+
+			user = User{UserName: "rose"}
+			db.Create(&user)
+			db.Create(&Phone{Number: "2251098", UserId: user.ID})
+
+			user = User{UserName: "jack"}
+			db.Create(&user)
+			db.Create(&Phone{Number: "2251099", UserId: user.ID})
+
+			user = User{UserName: "lili"}
+			db.Create(&user)
+			db.Create(&Phone{Number: "2251100", UserId: user.ID})
+
+			user = User{UserName: "wat"}
+			db.Create(&user)
+
 			fmt.Println("Insert OK!")
 		}
 	} else {
@@ -48,14 +57,15 @@ func main() {
 
 	var phones []Phone
 
-	pagination.Paging(&pagination.Param{
+	page := pagination.Paging(&pagination.Param{
 		DB:      db,
 		Page:    1,
-		Limit:   3,
+		Limit:   10,
 		OrderBy: []string{"id desc"},
 		Preload: []string{"User"},
 		ShowSQL: true,
 	}, &phones)
 
 	fmt.Println("phones:", phones)
+	fmt.Println(fmt.Sprintln("phones: %v", page.Records))
 }
