@@ -1,21 +1,19 @@
 package pagination
 
 import (
-	"math"
-
 	"github.com/jinzhu/gorm"
+	"math"
 )
 
-// Param 分页参数
 type Param struct {
 	DB      *gorm.DB
 	Page    int
 	Limit   int
 	OrderBy []string
 	ShowSQL bool
+	Preload []string
 }
 
-// Paginator 分页返回
 type Paginator struct {
 	TotalRecord int         `json:"total_record"`
 	TotalPage   int         `json:"total_page"`
@@ -27,7 +25,6 @@ type Paginator struct {
 	NextPage    int         `json:"next_page"`
 }
 
-// Paging 分页
 func Paging(p *Param, result interface{}) *Paginator {
 	db := p.DB
 
@@ -43,6 +40,12 @@ func Paging(p *Param, result interface{}) *Paginator {
 	if len(p.OrderBy) > 0 {
 		for _, o := range p.OrderBy {
 			db = db.Order(o)
+		}
+	}
+
+	if len(p.Preload) > 0 {
+		for _, relationName := range p.Preload {
+			db = db.Preload(relationName)
 		}
 	}
 

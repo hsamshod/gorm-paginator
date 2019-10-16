@@ -4,29 +4,40 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/biezhi/gorm-paginator/pagination"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/shamshod/gorm-paginator/pagination"
 )
 
-// User 用户
 type User struct {
 	ID       int
 	UserName string `gorm:"not null;size:100;unique"`
 }
 
+type Phone struct {
+	Number string
+	UserId int
+	User   User
+}
+
 func main() {
 	db, err := gorm.Open("sqlite3", "example.db")
 	if err == nil {
-		db.AutoMigrate(&User{})
+		db.AutoMigrate(&User{}, &Phone{})
+
 		count := 0
 		db.Model(User{}).Count(&count)
+
 		if count == 0 {
 			db.Create(User{ID: 1, UserName: "biezhi"})
+			db.Create(Phone{Number: "2251097", UserId: 1})
 			db.Create(User{ID: 2, UserName: "rose"})
+			db.Create(Phone{Number: "2251098", UserId: 2})
 			db.Create(User{ID: 3, UserName: "jack"})
+			db.Create(Phone{Number: "2251099", UserId: 3})
 			db.Create(User{ID: 4, UserName: "lili"})
+			db.Create(Phone{Number: "2251100", UserId: 4})
 			db.Create(User{ID: 5, UserName: "bob"})
 			db.Create(User{ID: 6, UserName: "tom"})
 			db.Create(User{ID: 7, UserName: "anny"})
@@ -38,34 +49,16 @@ func main() {
 		return
 	}
 
-	var users []User
+	var phones []Phone
 
 	pagination.Paging(&pagination.Param{
-		DB:      db.Where("id > ?", 0),
+		DB:      db,
 		Page:    1,
 		Limit:   3,
 		OrderBy: []string{"id desc"},
+		Preload: []string{"User"},
 		ShowSQL: true,
-	}, &users)
+	}, &phones)
 
-	fmt.Println("users:", users)
-
-	r := gin.Default()
-	r.GET("/", func(c *gin.Context) {
-		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-		limit, _ := strconv.Atoi(c.DefaultQuery("limit", "3"))
-		var users []User
-
-		paginator := pagination.Paging(&pagination.Param{
-			DB:      db,
-			Page:    page,
-			Limit:   limit,
-			OrderBy: []string{"id desc"},
-			ShowSQL: true,
-		}, &users)
-		c.JSON(200, paginator)
-	})
-
-	r.Run()
-
+	fmt.Println("phones:", phones)
 }
