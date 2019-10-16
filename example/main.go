@@ -2,12 +2,9 @@ package main
 
 import (
 	"fmt"
-	"strconv"
-
-	"github.com/gin-gonic/gin"
+	"github.com/hsamshod/gorm-paginator/pagination"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/shamshod/gorm-paginator/pagination"
 )
 
 type User struct {

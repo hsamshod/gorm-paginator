@@ -1,4 +1,4 @@
-module gitlab.com/shamshod/gorm-paginator
+module gitlab.com/hsamshod/gorm-paginator
 
 go 1.13
 
