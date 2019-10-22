@@ -5,13 +5,16 @@ import (
 	"math"
 )
 
+type Callable func(rec interface{}) interface{}
+
 type Param struct {
-	DB      *gorm.DB
-	Page    int
-	Limit   int
-	OrderBy []string
-	ShowSQL bool
-	Preload []string
+	DB                *gorm.DB
+	Page              int
+	Limit             int
+	OrderBy           []string
+	ShowSQL           bool
+	Preload           []string
+	RecordTransformer Callable
 }
 
 type Paginator struct {
@@ -66,8 +69,21 @@ func Paging(p *Param, result interface{}) *Paginator {
 	<-done
 
 	paginator.TotalRecord = count
-	paginator.Records = result
 	paginator.Page = p.Page
+
+	if p.RecordTransformer != nil {
+		var transformedRecords []interface{}
+		switch reflect.TypeOf(result).Kind() {
+		case reflect.Slice:
+			sl := reflect.ValueOf(result)
+			for i := 0; i < sl.Len(); i++ {
+				transformedRecords = append(transformedRecords, p.RecordTransformer(sl.Index(i)))
+			}
+			paginator.Records = transformedRecords
+		}
+	} else {
+		paginator.Records = result
+	}
 
 	paginator.Offset = offset
 	paginator.Limit = p.Limit
