@@ -3,6 +3,7 @@ package pagination
 import (
 	"github.com/jinzhu/gorm"
 	"math"
+	"reflect"
 )
 
 type Callable func(rec interface{}) interface{}
