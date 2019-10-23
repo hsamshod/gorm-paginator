@@ -3,7 +3,6 @@ package pagination
 import (
 	"github.com/jinzhu/gorm"
 	"math"
-	"reflect"
 )
 
 type Callable func(rec interface{}) interface{}
@@ -72,19 +71,7 @@ func Paging(p *Param, result interface{}) *Paginator {
 	paginator.TotalRecord = count
 	paginator.Page = p.Page
 
-	if p.RecordTransformer != nil {
-		var transformedRecords []interface{}
-		switch reflect.TypeOf(result).Kind() {
-		case reflect.Slice:
-			sl := reflect.ValueOf(result)
-			for i := 0; i < sl.Len(); i++ {
-				transformedRecords = append(transformedRecords, p.RecordTransformer(sl.Index(i)))
-			}
-			paginator.Records = transformedRecords
-		}
-	} else {
-		paginator.Records = result
-	}
+	paginator.Records = result
 
 	paginator.Offset = offset
 	paginator.Limit = p.Limit
