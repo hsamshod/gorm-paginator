@@ -48,7 +48,9 @@ func Paging(p *Param, result interface{}) *Paginator {
 
 	if len(p.Preload) > 0 {
 		for _, relationName := range p.Preload {
-			db = db.Preload(relationName)
+			db = db.Preload(relationName, func(db *gorm.DB) *gorm.DB {
+				return db.Unscoped()
+			})
 		}
 	}
 
