@@ -1,4 +1,4 @@
-module github.com/hsamshod/gorm-paginator
+module github.com/hsamshod/gorm-paginator/pagination
 
 go 1.13
 
